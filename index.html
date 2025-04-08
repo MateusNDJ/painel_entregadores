@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bem-vindo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+      font-size: 28px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .gestor-btn {
+      background-color: #ffffff;
+      color: #2E7D32;
+    }
+
+    .gestor-btn:hover {
+      background-color: #e0e0e0;
+    }
+
+    .entregador-btn {
+      background-color: #81C784;
+      color: white;
+    }
+
+    .entregador-btn:hover {
+      background-color: #66BB6A;
+    }
+
+    .voltar-btn {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 6px 12px;
+      background-color: #fff;
+      color: #2E7D32;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+
+    .voltar-btn:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+  
+    <h1>Bem-vindo ao Painel de Entregas</h1>
+    <button class="gestor-btn" onclick="location.href='login.html'">Login</button>
+    <button class="entregador-btn" onclick="location.href='cadastro.html'">Cadastrar</button>
+  </div>
+</body>
+</html>

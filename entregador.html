@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Gestor - Entregadores</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+  <style>
+    #mapa { height: 500px; margin-top: 10px; }
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; }
+    input, button { padding: 8px; margin: 5px; width: 100%; }
+    .entregadores { margin-top: 20px; }
+    .entregador { border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Painel do Gestor</h2>
+    <label for="destino">Digite o endereço de destino:</label>
+    <input type="text" id="destino" placeholder="Ex: Rua Augusta, 1000 - São Paulo">
+    <button onclick="criarRotaParaEntregador()">Criar Rota</button>
+
+    <div class="entregadores" id="lista-entregadores">
+      <h3>Entregadores ativos</h3>
+      <!-- Lista de entregadores injetada via JS -->
+    </div>
+
+    <div id="mapa"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+
+  <script>
+    const map = L.map('mapa').setView([-23.561684, -46.656139], 13); // Av. Paulista, SP
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const iconeEntregador = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/1472/1472859.png',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32]
+    });
+
+    let entregadores = [
+      { nome: "Carlos", posicao: [-23.561, -46.656], ativo: true, marker: null },
+      { nome: "Juliana", posicao: [-23.564, -46.659], ativo: false, marker: null },
+      { nome: "Bruno", posicao: [-23.562, -46.658], ativo: true, marker: null }
+    ];
+
+    function atualizarListaEntregadores() {
+      const container = document.getElementById("lista-entregadores");
+      container.innerHTML = '<h3>Entregadores ativos</h3>';
+      entregadores.forEach((e, i) => {
+        const status = e.ativo ? "Ativo" : "Inativo";
+        const div = document.createElement("div");
+        div.className = "entregador";
+        div.innerHTML = `<strong>${e.nome}</strong><br>Status: ${status}`;
+        container.appendChild(div);
+      });
+    }
+
+    function iniciarMapaComEntregadores() {
+      entregadores.forEach(e => {
+        if (e.ativo) {
+          e.marker = L.marker(e.posicao, { icon: iconeEntregador })
+            .addTo(map)
+            .bindPopup(`${e.nome} (ativo)`);
+        }
+      });
+
+      setInterval(() => {
+        entregadores.forEach(e => {
+          if (e.ativo && e.marker) {
+            e.posicao[0] += (Math.random() - 0.5) * 0.001;
+            e.posicao[1] += (Math.random() - 0.5) * 0.001;
+            e.marker.setLatLng(e.posicao);
+          }
+        });
+      }, 3000);
+    }
+
+    function criarRotaParaEntregador() {
+      const destino = document.getElementById("destino").value;
+      if (!destino) return alert("Digite um endereço");
+
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destino)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length === 0) return alert("Endereço não encontrado");
+
+          const destinoLatLng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+
+          L.Routing.control({
+            waypoints: [
+              L.latLng(-23.561684, -46.656139),
+              L.latLng(destinoLatLng)
+            ],
+            routeWhileDragging: false,
+            show: false
+          }).addTo(map);
+        });
+    }
+
+    // Inicializar tudo
+    atualizarListaEntregadores();
+    iniciarMapaComEntregadores();
+  </script>
+</body>
+</html>

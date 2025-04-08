@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Sistema de Entregas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 320px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #2E7D32;
+    }
+
+    select, input, button {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .form {
+      display: none;
+    }
+
+    .form.active {
+      display: block;
+    }
+
+    .mensagem {
+      font-size: 0.85rem;
+      color: red;
+      text-align: center;
+    }
+
+    .voltar-btn {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 6px 12px;
+      background-color: #ddd;
+      color: #333;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .voltar-btn:hover {
+      background-color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="voltar-btn">← Voltar</a>
+    <h2>Login</h2>
+
+    <select id="tipoUsuario" onchange="mudarFormulario()">
+      <option value="">Selecione o tipo</option>
+      <option value="gestor">Sou Gestor</option>
+      <option value="entregador">Sou Entregador</option>
+    </select>
+
+    <!-- Formulário Gestor -->
+    <div id="form-gestor" class="form">
+      <input type="text" id="login-gestor" placeholder="Usuário do Gestor" />
+      <input type="password" id="senha-gestor" placeholder="Senha do Gestor" />
+      <button onclick="loginGestor()">Entrar como Gestor</button>
+    </div>
+
+    <!-- Formulário Entregador -->
+    <div id="form-entregador" class="form">
+      <input type="text" id="login-entregador" placeholder="Nome do Entregador" />
+      <input type="password" id="senha-entregador" placeholder="Senha do Entregador" />
+      <button onclick="loginEntregador()">Entrar como Entregador</button>
+    </div>
+
+    <div class="mensagem" id="mensagem-erro"></div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    function mudarFormulario() {
+      const tipo = document.getElementById("tipoUsuario").value;
+      document.getElementById("form-gestor").classList.remove("active");
+      document.getElementById("form-entregador").classList.remove("active");
+      document.getElementById("mensagem-erro").textContent = "";
+
+      if (tipo === "gestor") {
+        document.getElementById("form-gestor").classList.add("active");
+      } else if (tipo === "entregador") {
+        document.getElementById("form-entregador").classList.add("active");
+      }
+    }
+
+    function loginGestor() {
+      const login = document.getElementById("login-gestor").value;
+      const senha = document.getElementById("senha-gestor").value;
+
+      if (login === "admin" && senha === "1234") {
+        localStorage.setItem("usuarioLogado", JSON.stringify({ tipo: "gestor", nome: login }));
+        window.location.href = "painel.html";
+      } else {
+        document.getElementById("mensagem-erro").textContent = "Login ou senha inválidos para gestor.";
+      }
+    }
+
+    function loginEntregador() {
+      const nome = document.getElementById("login-entregador").value.trim();
+      const senha = document.getElementById("senha-entregador").value.trim();
+
+      if (nome.length < 3 || senha.length < 3) {
+        document.getElementById("mensagem-erro").textContent = "Preencha todos os campos corretamente.";
+        return;
+      }
+
+      const entregadoresRef = firebase.database().ref("entregadores");
+
+      entregadoresRef.once("value", snapshot => {
+        let encontrado = false;
+
+        snapshot.forEach(child => {
+          const entregador = child.val();
+
+          if (entregador.nome === nome && entregador.senha === senha) {
+            encontrado = true;
+            localStorage.setItem("usuarioLogado", JSON.stringify({
+              tipo: "entregador",
+              nome: entregador.nome,
+              regiao: entregador.regiao,
+              id: child.key
+            }));
+            window.location.href = "entregador.html";
+          }
+        });
+
+        if (!encontrado) {
+          document.getElementById("mensagem-erro").textContent = "Entregador não encontrado.";
+        }
+      });
+    }
+  </script>
+</body>
+</html>

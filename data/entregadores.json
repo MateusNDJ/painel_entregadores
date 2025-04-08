@@ -1,0 +1,55 @@
+[
+  {
+    "id": 1,
+    "nome": "João",
+    "status": "inativo",
+    "latitude": -23.53,
+    "longitude": -46.638,
+    "rota": [
+      [
+        -23.525,
+        -46.635
+      ],
+      [
+        -23.527,
+        -46.636
+      ],
+      [
+        -23.53,
+        -46.638
+      ]
+    ],
+    "checkpointAtual": 2
+  },
+  {
+    "id": 2,
+    "nome": "Maria",
+    "status": "inativo",
+    "latitude": -23.532,
+    "longitude": -46.639,
+    "rota": [
+      [
+        -23.526,
+        -46.634
+      ],
+      [
+        -23.528,
+        -46.637
+      ],
+      [
+        -23.532,
+        -46.639
+      ]
+    ],
+    "checkpointAtual": 2
+  },
+  {
+    "id": 3,
+    "nome": "Carlos",
+    "status": "inativo",
+    "latitude": -23.529,
+    "longitude": -46.64,
+    "rota": [],
+    "checkpointAtual": 0
+  }
+]

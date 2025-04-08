@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Gestor</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      height: calc(100vh - 80px);
+    }
+    .sidebar {
+      width: 300px;
+      background: white;
+      padding: 1rem;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+    }
+    .map {
+      flex: 1;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+    .ativo {
+      color: green;
+    }
+    .inativo {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Painel do Gestor</h1>
+  </header>
+  <div class="container">
+    <div class="sidebar">
+      <h3>Entregadores</h3>
+      <ul id="listaEntregadores"></ul>
+      <hr>
+      <h3>Atribuir Rota</h3>
+      <input type="text" id="entregadorNome" placeholder="Nome do entregador">
+      <input type="text" id="destino" placeholder="Endereço de destino">
+      <button onclick="atribuirRota()">Criar rota</button>
+    </div>
+    <div class="map" id="map" style="height: 100%;"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+  <script>
+    const map = L.map('map').setView([-23.561684, -46.655981], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const entregadores = [
+      { nome: 'Lucas', lat: -23.561, lng: -46.66, ativo: false },
+      { nome: 'Joana', lat: -23.564, lng: -46.658, ativo: false },
+      { nome: 'Marcos', lat: -23.566, lng: -46.652, ativo: false },
+    ];
+
+    const marcadores = {};
+
+    function listarEntregadores() {
+      const ul = document.getElementById("listaEntregadores");
+      ul.innerHTML = "";
+      entregadores.forEach(e => {
+        const li = document.createElement("li");
+        li.textContent = `${e.nome} - `;
+        li.className = e.ativo ? 'ativo' : 'inativo';
+        li.textContent += e.ativo ? 'Ativo' : 'Inativo';
+        ul.appendChild(li);
+      });
+    }
+
+    function movimentar(entregador) {
+      const offsetLat = (Math.random() - 0.5) / 1000;
+      const offsetLng = (Math.random() - 0.5) / 1000;
+      entregador.lat += offsetLat;
+      entregador.lng += offsetLng;
+      marcadores[entregador.nome].setLatLng([entregador.lat, entregador.lng]);
+    }
+
+    entregadores.forEach(e => {
+      const marker = L.marker([e.lat, e.lng]).addTo(map).bindPopup(e.nome);
+      marcadores[e.nome] = marker;
+      e.ativo = true;
+    });
+
+    setInterval(() => {
+      entregadores.forEach(e => movimentar(e));
+      listarEntregadores();
+    }, 2000);
+
+    function atribuirRota() {
+      const nome = document.getElementById("entregadorNome").value.trim();
+      const destino = document.getElementById("destino").value.trim();
+      if (!nome || !destino) return alert("Preencha todos os campos.");
+
+      const entregador = entregadores.find(e => e.nome.toLowerCase() === nome.toLowerCase());
+      if (!entregador) return alert("Entregador não encontrado.");
+
+      const origem = 'Av. Paulista, 1000 - São Paulo';
+      L.Routing.control({
+        waypoints: [
+          L.latLng(entregador.lat, entregador.lng),
+          L.Routing.waypoint(null, destino)
+        ],
+        routeWhileDragging: false,
+        createMarker: function() { return null; }
+      }).addTo(map);
+    }
+
+    listarEntregadores();
+  </script>
+</body>
+</html>
